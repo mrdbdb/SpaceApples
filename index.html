@@ -8,14 +8,14 @@
         :root {
             --primary: #ff3333;
             --secondary: #00f2ff;
-            --bg: #050508;
+            --bg: #ffffff;
         }
 
         body {
             margin: 0;
             overflow: hidden;
             background-color: var(--bg);
-            color: #fff;
+            color: #111;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none;
             user-select: none;
@@ -28,6 +28,7 @@
             top: 0;
             left: 0;
             z-index: 1;
+            background: #ffffff;
         }
 
         /* UI Layer */
@@ -55,7 +56,7 @@
         #score-board {
             font-size: 28px;
             font-weight: 900;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             font-family: 'Courier New', Courier, monospace;
         }
 
@@ -92,7 +93,7 @@
         #overlay {
             position: absolute;
             inset: 0;
-            background: rgba(5, 5, 8, 0.85);
+            background: rgba(255, 255, 255, 0.85);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -120,7 +121,7 @@
 
         .start-btn {
             background: transparent;
-            color: #fff;
+            color: #111;
             border: 2px solid var(--primary);
             padding: 15px 50px;
             font-size: 20px;
@@ -163,13 +164,13 @@
         .dpad-btn {
             width: 80px;
             height: 80px;
-            background: rgba(255,255,255,0.07);
-            border: 2px solid rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.07);
+            border: 2px solid rgba(0,0,0,0.25);
             border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: #111;
             font-size: 30px;
             backdrop-filter: blur(5px);
             touch-action: manipulation;
@@ -299,7 +300,7 @@
                 if (this.x < 0) this.x = width;
             }
             draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${0.8 / this.z})`;
+                ctx.fillStyle = `rgba(0, 0, 0, ${0.8 / this.z})`;
                 ctx.fillRect(this.x, this.y, this.size, this.size);
             }
         }
@@ -352,21 +353,7 @@
                 const nx = this.x + Math.cos(this.angle) * 15;
                 const ny = this.y + Math.sin(this.angle) * 15;
                 
-                let burst = 15;
-                if (score >= 10000) {
-                    // OMEGA BURST
-                    for(let i=0; i<36; i++) {
-                        bullets.push(new Bullet(nx, ny, (i/36) * Math.PI * 2, COLORS.blue));
-                    }
-                    this.cooldown = 20;
-                    shake = 10;
-                } else if (score >= 6000) {
-                    bullets.push(new Bullet(nx, ny, this.angle - 0.2, COLORS.gold));
-                    bullets.push(new Bullet(nx, ny, this.angle - 0.1, COLORS.gold));
-                    bullets.push(new Bullet(nx, ny, this.angle + 0.1, COLORS.gold));
-                    bullets.push(new Bullet(nx, ny, this.angle + 0.2, COLORS.gold));
-                    this.cooldown = 12;
-                } else if (score >= 3000) {
+                if (score >= 3000) {
                     bullets.push(new Bullet(nx, ny, this.angle, COLORS.blue));
                     bullets.push(new Bullet(nx, ny, this.angle - 0.2, COLORS.blue));
                     bullets.push(new Bullet(nx, ny, this.angle + 0.2, COLORS.blue));
@@ -376,7 +363,7 @@
                     bullets.push(new Bullet(nx, ny, this.angle + 0.1, COLORS.green));
                     this.cooldown = 15;
                 } else {
-                    bullets.push(new Bullet(nx, ny, this.angle, '#fff'));
+                    bullets.push(new Bullet(nx, ny, this.angle, '#111'));
                     this.cooldown = 18;
                 }
             }
@@ -386,7 +373,7 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.angle);
                 
-                ctx.strokeStyle = '#fff';
+                ctx.strokeStyle = '#111';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(15, 0);
@@ -398,7 +385,7 @@
                 
                 // Glow based on upgrades
                 if (score >= 1000) {
-                    ctx.strokeStyle = score >= 10000 ? COLORS.blue : (score >= 6000 ? COLORS.gold : COLORS.green);
+                    ctx.strokeStyle = score >= 3000 ? COLORS.blue : COLORS.green;
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = ctx.strokeStyle;
                     ctx.stroke();
@@ -472,7 +459,7 @@
                 ctx.fill();
 
                 // Highlight
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath();
                 ctx.arc(-this.radius/3, -this.radius/3, this.radius/4, 0, Math.PI*2);
                 ctx.fill();
@@ -554,14 +541,12 @@
             bindTouch('btn-fire', 'shoot');
         }
 
-        let upgradeMilestones = [1000, 3000, 6000, 10000];
+        let upgradeMilestones = [1000, 3000];
         function checkUpgrades() {
             if (upgradeMilestones.length > 0 && score >= upgradeMilestones[0]) {
                 const milestone = upgradeMilestones.shift();
                 let msg = "DOUBLE SHOT";
                 if (milestone === 3000) msg = "TRIPLE SHOT";
-                if (milestone === 6000) msg = "QUAD SHOT";
-                if (milestone === 10000) msg = "OMEGA BURST UNLOCKED";
                 
                 upgradeMsg.innerText = msg;
                 upgradeMsg.style.opacity = '1';
@@ -577,12 +562,16 @@
             upgradeMilestones = [1000, 3000, 6000, 10000];
             updateLivesUI();
             
+            // Clear canvas to white
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ship = new Ship();
             bullets = [];
             apples = [];
             particles = [];
             for(let i=0; i<5; i++) apples.push(new Apple());
-            
+
             requestAnimationFrame(loop);
         }
 
@@ -607,7 +596,7 @@
             if (!gameActive) return;
 
             // Clear with slight trail
-            ctx.fillStyle = 'rgba(5, 5, 8, 0.4)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.fillRect(0, 0, width, height);
 
             // Screen Shake
@@ -660,7 +649,7 @@
                     if (dist < a.radius + ship.radius) {
                         lives--;
                         shake = 20;
-                        for(let k=0; k<50; k++) particles.push(new Particle(ship.x, ship.y, '#fff', 40));
+                        for(let k=0; k<50; k++) particles.push(new Particle(ship.x, ship.y, '#111', 40));
                         updateLivesUI();
                         if (lives <= 0) {
                             gameOver();
