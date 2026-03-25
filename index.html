@@ -352,7 +352,6 @@
                 const nx = this.x + Math.cos(this.angle) * 15;
                 const ny = this.y + Math.sin(this.angle) * 15;
                 
-                let burst = 15;
                 if (score >= 3000) {
                     bullets.push(new Bullet(nx, ny, this.angle, COLORS.blue));
                     bullets.push(new Bullet(nx, ny, this.angle - 0.2, COLORS.blue));
@@ -385,7 +384,7 @@
                 
                 // Glow based on upgrades
                 if (score >= 1000) {
-                    ctx.strokeStyle = score >= 10000 ? COLORS.blue : (score >= 6000 ? COLORS.gold : COLORS.green);
+                    ctx.strokeStyle = score >= 3000 ? COLORS.blue : COLORS.green;
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = ctx.strokeStyle;
                     ctx.stroke();
