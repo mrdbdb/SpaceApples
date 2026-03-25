@@ -8,14 +8,14 @@
         :root {
             --primary: #ff3333;
             --secondary: #00f2ff;
-            --bg: #050508;
+            --bg: #ffffff;
         }
 
         body {
             margin: 0;
             overflow: hidden;
             background-color: var(--bg);
-            color: #fff;
+            color: #111;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none;
             user-select: none;
@@ -55,7 +55,7 @@
         #score-board {
             font-size: 28px;
             font-weight: 900;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             font-family: 'Courier New', Courier, monospace;
         }
 
@@ -92,7 +92,7 @@
         #overlay {
             position: absolute;
             inset: 0;
-            background: rgba(5, 5, 8, 0.85);
+            background: rgba(255, 255, 255, 0.85);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -120,7 +120,7 @@
 
         .start-btn {
             background: transparent;
-            color: #fff;
+            color: #111;
             border: 2px solid var(--primary);
             padding: 15px 50px;
             font-size: 20px;
@@ -163,13 +163,13 @@
         .dpad-btn {
             width: 80px;
             height: 80px;
-            background: rgba(255,255,255,0.07);
-            border: 2px solid rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.07);
+            border: 2px solid rgba(0,0,0,0.25);
             border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: #111;
             font-size: 30px;
             backdrop-filter: blur(5px);
             touch-action: manipulation;
@@ -299,7 +299,7 @@
                 if (this.x < 0) this.x = width;
             }
             draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${0.8 / this.z})`;
+                ctx.fillStyle = `rgba(0, 0, 0, ${0.8 / this.z})`;
                 ctx.fillRect(this.x, this.y, this.size, this.size);
             }
         }
@@ -362,7 +362,7 @@
                     bullets.push(new Bullet(nx, ny, this.angle + 0.1, COLORS.green));
                     this.cooldown = 15;
                 } else {
-                    bullets.push(new Bullet(nx, ny, this.angle, '#fff'));
+                    bullets.push(new Bullet(nx, ny, this.angle, '#111'));
                     this.cooldown = 18;
                 }
             }
@@ -372,7 +372,7 @@
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.angle);
                 
-                ctx.strokeStyle = '#fff';
+                ctx.strokeStyle = '#111';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(15, 0);
@@ -458,7 +458,7 @@
                 ctx.fill();
 
                 // Highlight
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath();
                 ctx.arc(-this.radius/3, -this.radius/3, this.radius/4, 0, Math.PI*2);
                 ctx.fill();
@@ -591,7 +591,7 @@
             if (!gameActive) return;
 
             // Clear with slight trail
-            ctx.fillStyle = 'rgba(5, 5, 8, 0.4)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.fillRect(0, 0, width, height);
 
             // Screen Shake
@@ -644,7 +644,7 @@
                     if (dist < a.radius + ship.radius) {
                         lives--;
                         shake = 20;
-                        for(let k=0; k<50; k++) particles.push(new Particle(ship.x, ship.y, '#fff', 40));
+                        for(let k=0; k<50; k++) particles.push(new Particle(ship.x, ship.y, '#111', 40));
                         updateLivesUI();
                         if (lives <= 0) {
                             gameOver();
