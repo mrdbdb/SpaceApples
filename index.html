@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Space Apples: Super Edition</title>
+    <title>Space Poops: Super Edition</title>
     <style>
         :root {
             --primary: #ff3333;
@@ -241,9 +241,9 @@
     </div>
 
     <div id="overlay">
-        <h1 id="main-title">SPACE APPLES</h1>
+        <h1 id="main-title">SPACE POOPS</h1>
         <p class="subtitle">
-            THE APPLES ARE SPREADING. DESTROY THEM ALL.<br>
+            THE POOPS ARE SPREADING. DESTROY THEM ALL.<br>
             <span style="color: var(--secondary)">1K: Double | 3K: Triple | 6K: Quad | 10K: OMEGA</span><br><br>
             DESKTOP: Arrows + Space | MOBILE: Touch Controls
         </p>
@@ -267,7 +267,7 @@
         const input = { left: false, right: false, up: false, shoot: false };
 
         // Game objects
-        let ship, bullets, apples, particles, stars;
+        let ship, bullets, poops, particles, stars;
 
         const COLORS = {
             red: '#ff3333',
@@ -420,7 +420,7 @@
             }
         }
 
-        class Apple {
+        class Poop {
             constructor(x, y, size = 3) {
                 this.size = size; // 3: Large, 2: Med, 1: Small
                 this.radius = size * 15;
@@ -445,23 +445,40 @@
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rot);
-                
-                // Apple Shape
-                ctx.fillStyle = COLORS.red;
+
+                const r = this.radius;
+                const brown = '#8B4513';
+                const darkBrown = '#5C2E00';
+                const lightBrown = '#A0522D';
+
+                // Bottom blob
+                ctx.fillStyle = brown;
                 ctx.beginPath();
-                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.ellipse(0, r * 0.3, r * 0.9, r * 0.5, 0, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Leaf
-                ctx.fillStyle = COLORS.green;
+
+                // Middle blob
+                ctx.fillStyle = lightBrown;
                 ctx.beginPath();
-                ctx.ellipse(0, -this.radius, this.radius/2, this.radius/4, Math.PI/4, 0, Math.PI*2);
+                ctx.ellipse(0, -r * 0.1, r * 0.7, r * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Top blob (smaller)
+                ctx.fillStyle = brown;
+                ctx.beginPath();
+                ctx.ellipse(0, -r * 0.5, r * 0.45, r * 0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Tip
+                ctx.fillStyle = darkBrown;
+                ctx.beginPath();
+                ctx.ellipse(0, -r * 0.8, r * 0.15, r * 0.12, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Highlight
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
                 ctx.beginPath();
-                ctx.arc(-this.radius/3, -this.radius/3, this.radius/4, 0, Math.PI*2);
+                ctx.arc(-r * 0.2, -r * 0.3, r * 0.12, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.restore();
@@ -469,13 +486,13 @@
             hit() {
                 shake = this.size * 3;
                 for(let i=0; i<this.size * 10; i++) {
-                    particles.push(new Particle(this.x, this.y, COLORS.red, 20 + this.size*10));
+                    particles.push(new Particle(this.x, this.y, '#8B4513', 20 + this.size*10));
                 }
-                
+
                 if (this.size > 1) {
                     return [
-                        new Apple(this.x, this.y, this.size - 1),
-                        new Apple(this.x, this.y, this.size - 1)
+                        new Poop(this.x, this.y, this.size - 1),
+                        new Poop(this.x, this.y, this.size - 1)
                     ];
                 }
                 return [];
@@ -568,9 +585,9 @@
 
             ship = new Ship();
             bullets = [];
-            apples = [];
+            poops = [];
             particles = [];
-            for(let i=0; i<5; i++) apples.push(new Apple());
+            for(let i=0; i<5; i++) poops.push(new Poop());
 
             requestAnimationFrame(loop);
         }
@@ -588,7 +605,7 @@
             gameActive = false;
             overlay.style.display = 'flex';
             document.getElementById('main-title').innerText = "SYSTEM FAILED";
-            document.querySelector('.subtitle').innerHTML = `FINAL SCORE: <span style="color:var(--primary)">${score}</span><br>THE APPLES HAVE OVERRUN THE SECTOR.`;
+            document.querySelector('.subtitle').innerHTML = `FINAL SCORE: <span style="color:var(--primary)">${score}</span><br>THE POOPS HAVE OVERRUN THE SECTOR.`;
             document.querySelector('.start-btn').innerText = "REBOOT SYSTEM";
         }
 
@@ -611,9 +628,9 @@
             ship.update();
             ship.draw();
 
-            // Handle Apples & Spawning
-            if (apples.length < 5 + Math.floor(score/2000)) {
-                if (Math.random() < 0.02) apples.push(new Apple());
+            // Handle Poops & Spawning
+            if (poops.length < 5 + Math.floor(score/2000)) {
+                if (Math.random() < 0.02) poops.push(new Poop());
             }
 
             for (let i = bullets.length - 1; i >= 0; i--) {
@@ -622,8 +639,8 @@
                 if (bullets[i].life <= 0) bullets.splice(i, 1);
             }
 
-            for (let i = apples.length - 1; i >= 0; i--) {
-                const a = apples[i];
+            for (let i = poops.length - 1; i >= 0; i--) {
+                const a = poops[i];
                 a.update();
                 a.draw();
 
@@ -633,9 +650,9 @@
                     const dist = Math.hypot(a.x - b.x, a.y - b.y);
                     if (dist < a.radius + 5) {
                         const fragments = a.hit();
-                        apples.splice(i, 1);
+                        poops.splice(i, 1);
                         bullets.splice(j, 1);
-                        apples.push(...fragments);
+                        poops.push(...fragments);
                         score += (4 - a.size) * 100;
                         scoreEl.innerText = score.toString().padStart(4, '0');
                         checkUpgrades();
