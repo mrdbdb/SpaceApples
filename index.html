@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Space Apples: Super Edition</title>
+    <style>
+        :root {
+            --primary: #ff3333;
+            --secondary: #00f2ff;
+            --bg: #050508;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* UI Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        #score-board {
+            font-size: 28px;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .life-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .life-icon {
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 50% 75%, 18% 100%, 0% 38%);
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        #upgrade-msg {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            color: var(--secondary);
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px var(--secondary);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        /* Menu System */
+        #overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 5, 8, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: clamp(40px, 8vw, 80px);
+            margin: 0;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+            letter-spacing: 10px;
+            font-weight: 900;
+        }
+
+        .subtitle {
+            color: #888;
+            margin: 10px 0 30px;
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--primary);
+            padding: 15px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn:hover {
+            background: var(--primary);
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        /* Controls */
+        #mobile-controls {
+            display: none;
+            justify-content: space-between;
+            pointer-events: auto;
+            width: 100%;
+        }
+
+        .ctrl-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn:active {
+            background: rgba(255, 51, 51, 0.3);
+            border-color: var(--primary);
+            transform: scale(0.9);
+        }
+
+        @media (max-width: 768px) {
+            #mobile-controls { display: flex; }
+            .subtitle { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui-layer">
+        <div class="stats-container">
+            <div id="score-board">SCORE: <span id="score">0000</span></div>
+            <div class="life-container" id="lives">
+                <div class="life-icon"></div>
+                <div class="life-icon"></div>
+                <div class="life-icon"></div>
+            </div>
+        </div>
+
+        <div id="upgrade-msg">TRIPLE SHOT UNLOCKED</div>
+
+        <div id="mobile-controls">
+            <div class="ctrl-group">
+                <div class="btn" id="btn-left">◀</div>
+                <div class="btn" id="btn-right">▶</div>
+            </div>
+            <div class="ctrl-group">
+                <div class="btn" id="btn-fire" style="border-color: var(--secondary);">◎</div>
+                <div class="btn" id="btn-thrust" style="border-color: var(--primary);">▲</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <h1 id="main-title">SPACE APPLES</h1>
+        <p class="subtitle">
+            THE APPLES ARE SPREADING. DESTROY THEM ALL.<br>
+            <span style="color: var(--secondary)">1K: Double | 3K: Triple | 6K: Quad | 10K: OMEGA</span><br><br>
+            DESKTOP: Arrows + Space | MOBILE: Touch Controls
+        </p>
+        <button class="start-btn" onclick="startGame()">INITIATE SYSTEM</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const overlay = document.getElementById('overlay');
+        const upgradeMsg = document.getElementById('upgrade-msg');
+        
+        let width, height;
+        let score = 0;
+        let lives = 3;
+        let gameActive = false;
+        let shake = 0;
+
+        const input = { left: false, right: false, up: false, shoot: false };
+
+        // Game objects
+        let ship, bullets, apples, particles, stars;
+
+        const COLORS = {
+            red: '#ff3333',
+            blue: '#00f2ff',
+            gold: '#ffcc00',
+            green: '#44ff44',
+            white: '#ffffff'
+        };
+
+        // --- Utility ---
+        const rnd = (min, max) => Math.random() * (max - min) + min;
+
+        class Star {
+            constructor(z) {
+                this.z = z; // depth layer (1, 2, or 3)
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = 4 - z;
+                this.speed = (4 - z) * 0.2;
+            }
+            update() {
+                this.y += this.speed;
+                if (input.up) {
+                    this.y += Math.sin(ship.angle) * ship.vel.y * 0.1;
+                    this.x += Math.cos(ship.angle) * ship.vel.x * 0.1;
+                }
+                if (this.y > height) this.y = 0;
+                if (this.y < 0) this.y = height;
+                if (this.x > width) this.x = 0;
+                if (this.x < 0) this.x = width;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.8 / this.z})`;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+
+        class Ship {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = width / 2;
+                this.y = height / 2;
+                this.angle = -Math.PI / 2;
+                this.vel = { x: 0, y: 0 };
+                this.radius = 12;
+                this.cooldown = 0;
+                this.invul = 120;
+            }
+            update() {
+                if (input.left) this.angle -= 0.08;
+                if (input.right) this.angle += 0.08;
+                
+                if (input.up) {
+                    this.vel.x += Math.cos(this.angle) * 0.2;
+                    this.vel.y += Math.sin(this.angle) * 0.2;
+                    // Exhaust
+                    if (Math.random() > 0.5) {
+                        particles.push(new Particle(this.x - Math.cos(this.angle) * 10, this.y - Math.sin(this.angle) * 10, COLORS.red, 15));
+                    }
+                }
+                
+                this.x += this.vel.x;
+                this.y += this.vel.y;
+                this.vel.x *= 0.98;
+                this.vel.y *= 0.98;
+
+                // Screen Wrap
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+
+                if (this.cooldown > 0) this.cooldown--;
+                if (this.invul > 0) this.invul--;
+
+                if (input.shoot && this.cooldown <= 0) {
+                    this.fire();
+                }
+            }
+            fire() {
+                const nx = this.x + Math.cos(this.angle) * 15;
+                const ny = this.y + Math.sin(this.angle) * 15;
+                
+                let burst = 15;
+                if (score >= 10000) {
+                    // OMEGA BURST
+                    for(let i=0; i<36; i++) {
+                        bullets.push(new Bullet(nx, ny, (i/36) * Math.PI * 2, COLORS.blue));
+                    }
+                    this.cooldown = 20;
+                    shake = 10;
+                } else if (score >= 6000) {
+                    bullets.push(new Bullet(nx, ny, this.angle - 0.2, COLORS.gold));
+                    bullets.push(new Bullet(nx, ny, this.angle - 0.1, COLORS.gold));
+                    bullets.push(new Bullet(nx, ny, this.angle + 0.1, COLORS.gold));
+                    bullets.push(new Bullet(nx, ny, this.angle + 0.2, COLORS.gold));
+                    this.cooldown = 12;
+                } else if (score >= 3000) {
+                    bullets.push(new Bullet(nx, ny, this.angle, COLORS.blue));
+                    bullets.push(new Bullet(nx, ny, this.angle - 0.2, COLORS.blue));
+                    bullets.push(new Bullet(nx, ny, this.angle + 0.2, COLORS.blue));
+                    this.cooldown = 14;
+                } else if (score >= 1000) {
+                    bullets.push(new Bullet(nx, ny, this.angle - 0.1, COLORS.green));
+                    bullets.push(new Bullet(nx, ny, this.angle + 0.1, COLORS.green));
+                    this.cooldown = 15;
+                } else {
+                    bullets.push(new Bullet(nx, ny, this.angle, '#fff'));
+                    this.cooldown = 18;
+                }
+            }
+            draw() {
+                if (this.invul > 0 && Math.floor(Date.now() / 100) % 2 === 0) return;
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(15, 0);
+                ctx.lineTo(-12, 10);
+                ctx.lineTo(-8, 0);
+                ctx.lineTo(-12, -10);
+                ctx.closePath();
+                ctx.stroke();
+                
+                // Glow based on upgrades
+                if (score >= 1000) {
+                    ctx.strokeStyle = score >= 10000 ? COLORS.blue : (score >= 6000 ? COLORS.gold : COLORS.green);
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = ctx.strokeStyle;
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        class Bullet {
+            constructor(x, y, angle, color) {
+                this.x = x;
+                this.y = y;
+                this.vel = { x: Math.cos(angle) * 8, y: Math.sin(angle) * 8 };
+                this.color = color;
+                this.life = 100;
+            }
+            update() {
+                this.x += this.vel.x;
+                this.y += this.vel.y;
+                this.life--;
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Apple {
+            constructor(x, y, size = 3) {
+                this.size = size; // 3: Large, 2: Med, 1: Small
+                this.radius = size * 15;
+                this.x = x || (Math.random() > 0.5 ? -20 : width + 20);
+                this.y = y || Math.random() * height;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (4 - size) * 0.8;
+                this.vel = { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
+                this.rot = 0;
+                this.rotSpeed = rnd(-0.02, 0.02);
+            }
+            update() {
+                this.x += this.vel.x;
+                this.y += this.vel.y;
+                this.rot += this.rotSpeed;
+                if (this.x < -this.radius * 2) this.x = width + this.radius;
+                if (this.x > width + this.radius * 2) this.x = -this.radius;
+                if (this.y < -this.radius * 2) this.y = height + this.radius;
+                if (this.y > height + this.radius * 2) this.y = -this.radius;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rot);
+                
+                // Apple Shape
+                ctx.fillStyle = COLORS.red;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Leaf
+                ctx.fillStyle = COLORS.green;
+                ctx.beginPath();
+                ctx.ellipse(0, -this.radius, this.radius/2, this.radius/4, Math.PI/4, 0, Math.PI*2);
+                ctx.fill();
+
+                // Highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(-this.radius/3, -this.radius/3, this.radius/4, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+            hit() {
+                shake = this.size * 3;
+                for(let i=0; i<this.size * 10; i++) {
+                    particles.push(new Particle(this.x, this.y, COLORS.red, 20 + this.size*10));
+                }
+                
+                if (this.size > 1) {
+                    return [
+                        new Apple(this.x, this.y, this.size - 1),
+                        new Apple(this.x, this.y, this.size - 1)
+                    ];
+                }
+                return [];
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color, life) {
+                this.x = x;
+                this.y = y;
+                this.vel = { x: rnd(-2, 2), y: rnd(-2, 2) };
+                this.color = color;
+                this.life = life;
+                this.maxLife = life;
+            }
+            update() {
+                this.x += this.vel.x;
+                this.y += this.vel.y;
+                this.life--;
+            }
+            draw() {
+                ctx.globalAlpha = this.life / this.maxLife;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, 2, 2);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // --- Game Engine ---
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            if (!gameActive) {
+                stars = [];
+                for(let i=0; i<150; i++) stars.push(new Star(Math.ceil(Math.random()*3)));
+            }
+        }
+
+        function handleInput(key, state) {
+            if (key === 'ArrowLeft' || key === 'KeyA') input.left = state;
+            if (key === 'ArrowRight' || key === 'KeyD') input.right = state;
+            if (key === 'ArrowUp' || key === 'KeyW') input.up = state;
+            if (key === 'Space') input.shoot = state;
+        }
+
+        function setupControls() {
+            window.addEventListener('keydown', e => handleInput(e.code, true));
+            window.addEventListener('keyup', e => handleInput(e.code, false));
+            
+            const bindTouch = (id, action) => {
+                const el = document.getElementById(id);
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); input[action] = true; });
+                el.addEventListener('touchend', (e) => { e.preventDefault(); input[action] = false; });
+            };
+
+            bindTouch('btn-left', 'left');
+            bindTouch('btn-right', 'right');
+            bindTouch('btn-thrust', 'up');
+            bindTouch('btn-fire', 'shoot');
+        }
+
+        let upgradeMilestones = [1000, 3000, 6000, 10000];
+        function checkUpgrades() {
+            if (upgradeMilestones.length > 0 && score >= upgradeMilestones[0]) {
+                const milestone = upgradeMilestones.shift();
+                let msg = "DOUBLE SHOT";
+                if (milestone === 3000) msg = "TRIPLE SHOT";
+                if (milestone === 6000) msg = "QUAD SHOT";
+                if (milestone === 10000) msg = "OMEGA BURST UNLOCKED";
+                
+                upgradeMsg.innerText = msg;
+                upgradeMsg.style.opacity = '1';
+                setTimeout(() => upgradeMsg.style.opacity = '0', 2000);
+            }
+        }
+
+        function startGame() {
+            overlay.style.display = 'none';
+            score = 0;
+            lives = 3;
+            gameActive = true;
+            upgradeMilestones = [1000, 3000, 6000, 10000];
+            updateLivesUI();
+            
+            ship = new Ship();
+            bullets = [];
+            apples = [];
+            particles = [];
+            for(let i=0; i<5; i++) apples.push(new Apple());
+            
+            requestAnimationFrame(loop);
+        }
+
+        function updateLivesUI() {
+            livesEl.innerHTML = '';
+            for(let i=0; i<lives; i++) {
+                const l = document.createElement('div');
+                l.className = 'life-icon';
+                livesEl.appendChild(l);
+            }
+        }
+
+        function gameOver() {
+            gameActive = false;
+            overlay.style.display = 'flex';
+            document.getElementById('main-title').innerText = "SYSTEM FAILED";
+            document.querySelector('.subtitle').innerHTML = `FINAL SCORE: <span style="color:var(--primary)">${score}</span><br>THE APPLES HAVE OVERRUN THE SECTOR.`;
+            document.querySelector('.start-btn').innerText = "REBOOT SYSTEM";
+        }
+
+        function loop() {
+            if (!gameActive) return;
+
+            // Clear with slight trail
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.4)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Screen Shake
+            ctx.save();
+            if (shake > 0) {
+                ctx.translate(rnd(-shake, shake), rnd(-shake, shake));
+                shake *= 0.9;
+            }
+
+            stars.forEach(s => { s.update(); s.draw(); });
+
+            ship.update();
+            ship.draw();
+
+            // Handle Apples & Spawning
+            if (apples.length < 5 + Math.floor(score/2000)) {
+                if (Math.random() < 0.02) apples.push(new Apple());
+            }
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                bullets[i].update();
+                bullets[i].draw();
+                if (bullets[i].life <= 0) bullets.splice(i, 1);
+            }
+
+            for (let i = apples.length - 1; i >= 0; i--) {
+                const a = apples[i];
+                a.update();
+                a.draw();
+
+                // Bullet collision
+                for (let j = bullets.length - 1; j >= 0; j--) {
+                    const b = bullets[j];
+                    const dist = Math.hypot(a.x - b.x, a.y - b.y);
+                    if (dist < a.radius + 5) {
+                        const fragments = a.hit();
+                        apples.splice(i, 1);
+                        bullets.splice(j, 1);
+                        apples.push(...fragments);
+                        score += (4 - a.size) * 100;
+                        scoreEl.innerText = score.toString().padStart(4, '0');
+                        checkUpgrades();
+                        break;
+                    }
+                }
+
+                // Ship collision
+                if (ship.invul <= 0) {
+                    const dist = Math.hypot(a.x - ship.x, a.y - ship.y);
+                    if (dist < a.radius + ship.radius) {
+                        lives--;
+                        shake = 20;
+                        for(let k=0; k<50; k++) particles.push(new Particle(ship.x, ship.y, '#fff', 40));
+                        updateLivesUI();
+                        if (lives <= 0) {
+                            gameOver();
+                        } else {
+                            ship.reset();
+                        }
+                    }
+                }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].life <= 0) particles.splice(i, 1);
+            }
+
+            ctx.restore();
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('load', () => {
+            resize();
+            setupControls();
+            window.addEventListener('resize', resize);
+        });
+    </script>
+</body>
+</html>
