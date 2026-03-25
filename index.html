@@ -28,6 +28,7 @@
             top: 0;
             left: 0;
             z-index: 1;
+            background: #ffffff;
         }
 
         /* UI Layer */
@@ -561,12 +562,16 @@
             upgradeMilestones = [1000, 3000, 6000, 10000];
             updateLivesUI();
             
+            // Clear canvas to white
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ship = new Ship();
             bullets = [];
             apples = [];
             particles = [];
             for(let i=0; i<5; i++) apples.push(new Apple());
-            
+
             requestAnimationFrame(loop);
         }
 
