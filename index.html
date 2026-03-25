@@ -353,20 +353,7 @@
                 const ny = this.y + Math.sin(this.angle) * 15;
                 
                 let burst = 15;
-                if (score >= 10000) {
-                    // OMEGA BURST
-                    for(let i=0; i<36; i++) {
-                        bullets.push(new Bullet(nx, ny, (i/36) * Math.PI * 2, COLORS.blue));
-                    }
-                    this.cooldown = 20;
-                    shake = 10;
-                } else if (score >= 6000) {
-                    bullets.push(new Bullet(nx, ny, this.angle - 0.2, COLORS.gold));
-                    bullets.push(new Bullet(nx, ny, this.angle - 0.1, COLORS.gold));
-                    bullets.push(new Bullet(nx, ny, this.angle + 0.1, COLORS.gold));
-                    bullets.push(new Bullet(nx, ny, this.angle + 0.2, COLORS.gold));
-                    this.cooldown = 12;
-                } else if (score >= 3000) {
+                if (score >= 3000) {
                     bullets.push(new Bullet(nx, ny, this.angle, COLORS.blue));
                     bullets.push(new Bullet(nx, ny, this.angle - 0.2, COLORS.blue));
                     bullets.push(new Bullet(nx, ny, this.angle + 0.2, COLORS.blue));
@@ -554,14 +541,12 @@
             bindTouch('btn-fire', 'shoot');
         }
 
-        let upgradeMilestones = [1000, 3000, 6000, 10000];
+        let upgradeMilestones = [1000, 3000];
         function checkUpgrades() {
             if (upgradeMilestones.length > 0 && score >= upgradeMilestones[0]) {
                 const milestone = upgradeMilestones.shift();
                 let msg = "DOUBLE SHOT";
                 if (milestone === 3000) msg = "TRIPLE SHOT";
-                if (milestone === 6000) msg = "QUAD SHOT";
-                if (milestone === 10000) msg = "OMEGA BURST UNLOCKED";
                 
                 upgradeMsg.innerText = msg;
                 upgradeMsg.style.opacity = '1';
