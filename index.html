@@ -508,8 +508,9 @@
             
             const bindTouch = (id, action) => {
                 const el = document.getElementById(id);
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); input[action] = true; });
-                el.addEventListener('touchend', (e) => { e.preventDefault(); input[action] = false; });
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); input[action] = true; }, { passive: false });
+                el.addEventListener('touchend', (e) => { e.preventDefault(); input[action] = false; }, { passive: false });
+                el.addEventListener('touchcancel', () => { input[action] = false; });
             };
 
             bindTouch('btn-left', 'left');
