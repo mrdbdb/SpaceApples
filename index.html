@@ -141,36 +141,69 @@
         #mobile-controls {
             display: none;
             justify-content: space-between;
+            align-items: flex-end;
             pointer-events: auto;
             width: 100%;
+            padding: 0 10px 24px;
+            box-sizing: border-box;
         }
 
-        .ctrl-group {
+        #dpad {
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
         }
 
-        .btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
+        .dpad-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dpad-btn {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.07);
+            border: 2px solid rgba(255,255,255,0.25);
+            border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 24px;
+            font-size: 30px;
             backdrop-filter: blur(5px);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .btn:active {
+        .dpad-btn:active {
             background: rgba(255, 51, 51, 0.3);
             border-color: var(--primary);
-            transform: scale(0.9);
+            transform: scale(0.92);
         }
 
-        @media (max-width: 768px) {
+        #fire-group {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        #btn-fire {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border-color: var(--secondary);
+            color: var(--secondary);
+            font-size: 44px;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        #btn-fire:active {
+            background: rgba(0, 242, 255, 0.2);
+            border-color: var(--secondary);
+            box-shadow: 0 0 30px var(--secondary);
+        }
+
+        @media (pointer: coarse) {
             #mobile-controls { display: flex; }
             .subtitle { font-size: 12px; }
         }
@@ -193,13 +226,15 @@
         <div id="upgrade-msg">TRIPLE SHOT UNLOCKED</div>
 
         <div id="mobile-controls">
-            <div class="ctrl-group">
-                <div class="btn" id="btn-left">◀</div>
-                <div class="btn" id="btn-right">▶</div>
+            <div id="dpad">
+                <div class="dpad-btn" id="btn-thrust">▲</div>
+                <div class="dpad-row">
+                    <div class="dpad-btn" id="btn-left">◀</div>
+                    <div class="dpad-btn" id="btn-right">▶</div>
+                </div>
             </div>
-            <div class="ctrl-group">
-                <div class="btn" id="btn-fire" style="border-color: var(--secondary);">◎</div>
-                <div class="btn" id="btn-thrust" style="border-color: var(--primary);">▲</div>
+            <div id="fire-group">
+                <div class="dpad-btn" id="btn-fire">◎</div>
             </div>
         </div>
     </div>
