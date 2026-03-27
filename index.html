@@ -205,7 +205,7 @@
         <h1 id="main-title">SPACE POOPS 3D</h1>
         <p class="subtitle">
             THE POOPS ARE SPREADING. DESTROY THEM ALL.<br>
-            <span style="color: var(--secondary)">1K: Double | 3K: Triple</span><br><br>
+            <span style="color: var(--secondary)">3K: Double | 8K: Triple</span><br><br>
             DESKTOP: Arrows + Space | MOBILE: Touch Controls
         </p>
         <button class="start-btn" onclick="startGame()">INITIATE SYSTEM</button>
@@ -606,7 +606,7 @@
             score = 0;
             lives = 3;
             gameActive = true;
-            upgradeMilestones = [1000, 3000];
+            upgradeMilestones = [3000, 8000];
             updateLivesUI();
             scoreEl.innerText = '0000';
 
@@ -682,10 +682,10 @@
 
             // Ship glow based on upgrades
             const bodyMesh = shipGroup.children[0];
-            if (score >= 3000) {
+            if (score >= 8000) {
                 bodyMesh.material.emissive.setHex(0x003344);
                 bodyMesh.material.color.setHex(0x00f2ff);
-            } else if (score >= 1000) {
+            } else if (score >= 3000) {
                 bodyMesh.material.emissive.setHex(0x002200);
                 bodyMesh.material.color.setHex(0x44ff44);
             } else {
@@ -698,17 +698,17 @@
                 const nx = shipState.x - Math.sin(shipState.angle) * 12;
                 const nz = shipState.z - Math.cos(shipState.angle) * 12;
 
-                if (score >= 3000) {
+                if (score >= 8000) {
                     fireBullet(nx, nz, shipState.angle, 0x00f2ff);
                     fireBullet(nx, nz, shipState.angle - 0.2, 0x00f2ff);
                     fireBullet(nx, nz, shipState.angle + 0.2, 0x00f2ff);
                     shipState.cooldown = 14;
-                } else if (score >= 1000) {
+                } else if (score >= 3000) {
                     fireBullet(nx, nz, shipState.angle - 0.1, 0x44ff44);
                     fireBullet(nx, nz, shipState.angle + 0.1, 0x44ff44);
                     shipState.cooldown = 15;
                 } else {
-                    fireBullet(nx, nz, shipState.angle, 0xffffff);
+                    fireBullet(nx, nz, shipState.angle, 0x111111);
                     shipState.cooldown = 18;
                 }
             }
@@ -731,8 +731,10 @@
             }
 
             // --- Poop Spawning ---
-            if (poops.length < 5 + Math.floor(score / 2000)) {
-                if (Math.random() < 0.02) spawnPoop();
+            const maxPoops = score >= 8000 ? 20 : score >= 3000 ? 12 : 5 + Math.floor(score / 2000);
+            const spawnRate = score >= 8000 ? 0.05 : score >= 3000 ? 0.035 : 0.02;
+            if (poops.length < maxPoops) {
+                if (Math.random() < spawnRate) spawnPoop();
             }
 
             // --- Poops Update ---
