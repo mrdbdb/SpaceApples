@@ -205,7 +205,7 @@
         <h1 id="main-title">SPACE POOPS 3D</h1>
         <p class="subtitle">
             THE POOPS ARE SPREADING. DESTROY THEM ALL.<br>
-            <span style="color: var(--secondary)">1K: Double | 3K: Triple | 6K: Quad | 10K: OMEGA</span><br><br>
+            <span style="color: var(--secondary)">1K: Double | 3K: Triple</span><br><br>
             DESKTOP: Arrows + Space | MOBILE: Touch Controls
         </p>
         <button class="start-btn" onclick="startGame()">INITIATE SYSTEM</button>
@@ -563,8 +563,6 @@
                 const milestone = upgradeMilestones.shift();
                 let msg = "DOUBLE SHOT";
                 if (milestone === 3000) msg = "TRIPLE SHOT";
-                if (milestone === 6000) msg = "QUAD SHOT";
-                if (milestone === 10000) msg = "OMEGA MODE";
                 upgradeMsg.innerText = msg;
                 upgradeMsg.style.opacity = '1';
                 setTimeout(() => upgradeMsg.style.opacity = '0', 2000);
@@ -608,7 +606,7 @@
             score = 0;
             lives = 3;
             gameActive = true;
-            upgradeMilestones = [1000, 3000, 6000, 10000];
+            upgradeMilestones = [1000, 3000];
             updateLivesUI();
             scoreEl.innerText = '0000';
 
@@ -684,10 +682,7 @@
 
             // Ship glow based on upgrades
             const bodyMesh = shipGroup.children[0];
-            if (score >= 10000) {
-                bodyMesh.material.emissive.setHex(0xffcc00);
-                bodyMesh.material.color.setHex(0xffcc00);
-            } else if (score >= 3000) {
+            if (score >= 3000) {
                 bodyMesh.material.emissive.setHex(0x003344);
                 bodyMesh.material.color.setHex(0x00f2ff);
             } else if (score >= 1000) {
@@ -703,18 +698,7 @@
                 const nx = shipState.x - Math.sin(shipState.angle) * 12;
                 const nz = shipState.z - Math.cos(shipState.angle) * 12;
 
-                if (score >= 10000) {
-                    for (let a = -0.3; a <= 0.3; a += 0.15) {
-                        fireBullet(nx, nz, shipState.angle + a, 0xffcc00);
-                    }
-                    shipState.cooldown = 10;
-                } else if (score >= 6000) {
-                    fireBullet(nx, nz, shipState.angle, 0xff3333);
-                    fireBullet(nx, nz, shipState.angle - 0.2, 0xff3333);
-                    fireBullet(nx, nz, shipState.angle + 0.2, 0xff3333);
-                    fireBullet(nx, nz, shipState.angle + Math.PI, 0xff3333);
-                    shipState.cooldown = 12;
-                } else if (score >= 3000) {
+                if (score >= 3000) {
                     fireBullet(nx, nz, shipState.angle, 0x00f2ff);
                     fireBullet(nx, nz, shipState.angle - 0.2, 0x00f2ff);
                     fireBullet(nx, nz, shipState.angle + 0.2, 0x00f2ff);
