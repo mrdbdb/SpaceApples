@@ -667,12 +667,12 @@
             const dt = Math.min(clock.getDelta(), 0.05);
 
             // --- Ship Update ---
-            if (input.left) shipState.angle += 2.4 * dt;
-            if (input.right) shipState.angle -= 2.4 * dt;
+            if (input.left) shipState.angle += 4.0 * dt;
+            if (input.right) shipState.angle -= 4.0 * dt;
 
             if (input.up) {
-                shipState.vx -= Math.sin(shipState.angle) * 9 * dt;
-                shipState.vz -= Math.cos(shipState.angle) * 9 * dt;
+                shipState.vx -= Math.sin(shipState.angle) * 150 * dt;
+                shipState.vz -= Math.cos(shipState.angle) * 150 * dt;
                 spawnExhaust(shipState.x, shipState.z, shipState.angle);
 
                 // Engine glow
@@ -689,8 +689,8 @@
 
             shipState.x += shipState.vx * dt;
             shipState.z += shipState.vz * dt;
-            shipState.vx *= Math.pow(0.3, dt);
-            shipState.vz *= Math.pow(0.3, dt);
+            shipState.vx *= Math.pow(0.3, dt * 0.5);
+            shipState.vz *= Math.pow(0.3, dt * 0.5);
 
             // Wrap
             shipState.x = wrap(shipState.x);
