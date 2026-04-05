@@ -427,46 +427,26 @@
         const poops = [];
 
         function createPoopMesh(size) {
-            const group = new THREE.Group();
-            const brown = 0x8B4513;
-            const lightBrown = 0xA0522D;
-            const darkBrown = 0x5C2E00;
             const r = size * 5;
+            const texSize = 128;
+            const canvas2d = document.createElement('canvas');
+            canvas2d.width = texSize;
+            canvas2d.height = texSize;
+            const ctx2d = canvas2d.getContext('2d');
+            ctx2d.clearRect(0, 0, texSize, texSize);
+            ctx2d.font = `${texSize * 0.85}px serif`;
+            ctx2d.textAlign = 'center';
+            ctx2d.textBaseline = 'middle';
+            ctx2d.fillText('\uD83D\uDCA9', texSize / 2, texSize / 2);
 
-            // Bottom blob
-            const bottomGeo = new THREE.SphereGeometry(r * 0.9, 12, 8);
-            bottomGeo.scale(1, 0.6, 1);
-            const bottomMat = new THREE.MeshPhongMaterial({ color: brown, flatShading: true });
-            const bottom = new THREE.Mesh(bottomGeo, bottomMat);
-            bottom.position.y = 0;
-            group.add(bottom);
-
-            // Middle blob
-            const midGeo = new THREE.SphereGeometry(r * 0.7, 12, 8);
-            midGeo.scale(1, 0.65, 1);
-            const midMat = new THREE.MeshPhongMaterial({ color: lightBrown, flatShading: true });
-            const mid = new THREE.Mesh(midGeo, midMat);
-            mid.position.y = r * 0.5;
-            group.add(mid);
-
-            // Top blob
-            const topGeo = new THREE.SphereGeometry(r * 0.45, 10, 8);
-            topGeo.scale(1, 0.7, 1);
-            const topMat = new THREE.MeshPhongMaterial({ color: brown, flatShading: true });
-            const top = new THREE.Mesh(topGeo, topMat);
-            top.position.y = r * 0.9;
-            group.add(top);
-
-            // Tip
-            const tipGeo = new THREE.SphereGeometry(r * 0.2, 8, 6);
-            const tipMat = new THREE.MeshPhongMaterial({ color: darkBrown, flatShading: true });
-            const tip = new THREE.Mesh(tipGeo, tipMat);
-            tip.position.y = r * 1.2;
-            group.add(tip);
-
-            group.position.y = 10;
-            scene.add(group);
-            return group;
+            const texture = new THREE.CanvasTexture(canvas2d);
+            const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(mat);
+            const scale = r * 2.5;
+            sprite.scale.set(scale, scale, 1);
+            sprite.position.y = 10;
+            scene.add(sprite);
+            return sprite;
         }
 
         function spawnPoop(x, z, size) {
